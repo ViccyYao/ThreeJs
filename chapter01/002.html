@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>materialsLight</title>
+  <script src="../js/threejs/three.js"></script>
+  <script src="../js/vendor/jquery-3.4.1.min.js"></script>
+  <script src="../js/threejs/dat.gui.js"></script>
+  <script src="../js/threejs/stats.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+<div id="webGL-output"></div>
+
+<script type="application/javascript">
+  $(function () {
+    initGis();
+  });
+
+  function initGis() {
+    var scene = new THREE.Scene();
+
+    var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMapEnabled = true;
+
+    var plane = new THREE.Mesh(new THREE.PlaneGeometry(60, 20), new THREE.MeshLambertMaterial({color: 0xffffff}));
+    plane.receiveShadow = true;
+
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.set(15, 0, 0);
+    scene.add(plane);
+
+    var cube = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), new THREE.MeshLambertMaterial({color: 0xff0000}));
+    cube.castShadow = true;
+    cube.position.set(-4, 3, 0);
+    scene.add(cube);
+
+    var sphere = new THREE.Mesh(new THREE.SphereGeometry(4, 20, 20), new THREE.MeshLambertMaterial({color: 0x77ffff}));
+    sphere.castShadow = true;
+    sphere.position.set(20, 4, 2);
+    scene.add(sphere);
+
+
+
+
+    var spotLight = new THREE.SpotLight(0xeeeeee);
+    spotLight.position.set(-40, 60, -20);
+    spotLight.castShadow = true;
+
+    scene.add(spotLight);
+
+    camera.position.set(-30, 40, 30);
+    camera.lookAt(scene.position);
+
+    var axes = new THREE.AxisHelper(40);
+    scene.add(axes);
+
+
+    $("#webGL-output").append(renderer.domElement);
+
+    renderer.render(scene, camera);
+
+  }
+</script>
+</body>
+</html>
