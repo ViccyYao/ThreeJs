@@ -34,6 +34,7 @@
         renderer = new THREE.WebGLRenderer();
         renderer.setClearColor(0xEEEEEE, 1);
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMapEnabled = true;
 
         //添加一个平面
         plane = new THREE.Mesh(new THREE.PlaneGeometry(60, 40, 1, 1), new THREE.MeshLambertMaterial({color: 0xffffff}));
