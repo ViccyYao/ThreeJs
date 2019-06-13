@@ -26,6 +26,8 @@
     var camerax = -90, cameray = 20, cameraz = 20;
     var cameraLookX = 0, cameraLookY = 0, cameraLookZ = 0;
 
+    var lightpositionX = -40, lightpositionY = 40, lightpositionZ = 50;
+
     function initGis() {
         stats = initStats();
         scene = new THREE.Scene();
@@ -57,7 +59,7 @@
         //点光源
         var spotLight = new THREE.SpotLight(0xffffff);
         spotLight.castShadow = true;
-        spotLight.position.set(-40, 40, 50);
+        spotLight.position.set(lightpositionX, lightpositionY, lightpositionZ);
         scene.add(spotLight);
 
 
@@ -113,26 +115,34 @@
             this.moveLeft = function () {
                 camerax -= 20;
                 cameraLookX -= 20;
+                lightpositionX -= 20;
                 camera.position.set(camerax, cameray, cameraz);
                 camera.lookAt(new THREE.Vector3(cameraLookX, cameraLookY, cameraLookZ));
+                spotLight.position.set(lightpositionX, lightpositionY, lightpositionZ);
             };
             this.moveRight = function () {
                 camerax += 20;
                 cameraLookX += 20;
+                lightpositionX += 20;
                 camera.position.set(camerax, cameray, cameraz);
                 camera.lookAt(new THREE.Vector3(cameraLookX, cameraLookY, cameraLookZ));
+                spotLight.position.set(lightpositionX, lightpositionY, lightpositionZ);
             };
             this.moveUp = function () {
                 cameraz -= 20;
                 cameraLookZ -= 20;
+                lightpositionZ -= 20;
                 camera.position.set(camerax, cameray, cameraz);
                 camera.lookAt(new THREE.Vector3(cameraLookX, cameraLookY, cameraLookZ));
+                spotLight.position.set(lightpositionX, lightpositionY, lightpositionZ);
             };
             this.moveDown = function () {
                 cameraz += 20;
                 cameraLookZ += 20;
+                lightpositionZ += 20;
                 camera.position.set(camerax, cameray, cameraz);
                 camera.lookAt(new THREE.Vector3(cameraLookX, cameraLookY, cameraLookZ));
+                spotLight.position.set(lightpositionX, lightpositionY, lightpositionZ);
             };
         };
 
