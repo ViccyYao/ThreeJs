@@ -73,7 +73,7 @@
         $("#WebGL-output").append(renderer.domElement);
 
         var step = 0;
-
+        //添加控制方法
         var controls = new function () {
             this.rotationSpeed = 0.02;
             this.numberOfObjects = scene.children.length;
@@ -102,6 +102,7 @@
                 console.log(scene.children);
             };
         };
+        //添加到控制面板
         var gui = new dat.GUI();
         gui.add(controls, "rotationSpeed", 0, 0.5);
         gui.add(controls, "addCue");
@@ -138,7 +139,7 @@
             geoms.push(new THREE.BoxGeometry(2, 2, 2));
             geoms.push(new THREE.CylinderGeometry(1, 4, 2));
             geoms.push(new THREE.SphereGeometry(2, 60, 60));
-            geoms.push(new THREE.IcosahedronGeometry(4))
+            geoms.push(new THREE.IcosahedronGeometry(4));
 
             var points = [];
             points.push(new THREE.Vector3(2, 2, 2));

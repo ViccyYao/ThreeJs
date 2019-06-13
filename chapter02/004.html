@@ -138,7 +138,7 @@
             geoms.push(new THREE.BoxGeometry(2, 2, 2));
             geoms.push(new THREE.CylinderGeometry(1, 4, 2));
             geoms.push(new THREE.SphereGeometry(2, 60, 60));
-            geoms.push(new THREE.IcosahedronGeometry(4))
+            geoms.push(new THREE.IcosahedronGeometry(4));
 
             var points = [];
             points.push(new THREE.Vector3(2, 2, 2));
@@ -188,6 +188,7 @@
 
                 //var mesh = new THREE.Mesh(geoms[i],materials[i]);
                 //mesh.castShadow=true;
+
                 mesh.position.x = -24 + ((i % 4) * 12);
                 mesh.position.y = 4;
                 mesh.position.z = -8 + (j * 12);
