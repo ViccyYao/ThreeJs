@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>change pointLight</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script src="../js/vendor/jquery-3.4.1.min.js"></script>
+    <script src="../js/threejs/three.js"></script>
+    <script src="../js/threejs/stats.js"></script>
+    <script src="../js/threejs/dat.gui.js"></script>
+</head>
+<body>
+
+<div id="Stats-output" style="position: absolute;top: 0;left: 0"></div>
+<div id="WebGL-output"></div>
+<script type="text/javascript">
+    var stats, scene, camera, renderer;
+    $(function () {
+        initGis();
+    });
+
+    function initGis() {
+        stats = initStats();
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0xEEEEEE, 1.0);
+        //renderer.shadowMapEnabled = true;
+
+        var plane = new THREE.Mesh(new THREE.PlaneGeometry(60, 20, 20, 20), new THREE.MeshLambertMaterial({color: 0xffffff}));
+        plane.receiveShadow = true;
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.set(15, 0, 0);
+
+        scene.add(plane);
+
+        var cube = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), new THREE.MeshLambertMaterial({color: 0xff7777}));
+        cube.position.set(-4, 3, 0);
+        cube.castShadow = true;
+
+        scene.add(cube);
+
+        var sphere = new THREE.Mesh(new THREE.SphereGeometry(4, 20, 20), new THREE.MeshLambertMaterial({color: 0xff7777}));
+        sphere.position.set(20, 0, 2);
+        sphere.castShadow = true;
+
+        scene.add(sphere);
+
+        camera.position.set(-25, 30, 25);
+
+        camera.lookAt(new THREE.Vector3(10, 0, 0));
+
+        var ambiColor = "#0c0c0c";
+        var ambientLight = new THREE.AmbientLight(ambiColor);
+        scene.add(ambientLight);
+
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(-40, 60, -10);
+        spotLight.castShadow = true;
+        //scene.add(spotLight);
+
+        var pointColor = "#ccffcc";
+        var pointLight = new THREE.PointLight(pointColor);
+        pointLight.distance = 100;
+        scene.add(pointLight);
+
+
+        // add a small sphere simulating the pointlight
+        var sphereLightMesh = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshBasicMaterial({color: 0xac6c25}));
+        sphereLightMesh.castShadow = true;
+        sphereLightMesh.position = new THREE.Vector3(3, 0, 3);
+        scene.add(sphereLightMesh);
+
+
+        $("#WebGL-output").append(renderer.domElement);
+
+
+        // call the render function
+        var step = 0;
+
+        // used to determine the switch point for the light animation
+        var invert = 1;
+        var phase = 0;
+
+        var controls = new function () {
+            this.rotationSpeed = 0.03;
+            this.bounceSpeed = 0.03;
+            this.pointColor = pointColor;
+            this.ambientColor = ambiColor;
+            this.intensity = 1;
+            this.distance = 100;
+        };
+
+        var gui = new dat.GUI();
+
+        gui.add(controls, "rotationSpeed", 0, 0.5);
+        gui.add(controls, "bounceSpeed", 0, 0.5);
+
+        gui.addColor(controls, "ambientColor").onChange(function (e) {
+            ambientLight.color = new THREE.Color(e);
+        });
+
+        gui.addColor(controls, "pointColor").onChange(function (e) {
+            pointLight.color = new THREE.Color(e);
+        });
+
+        gui.add(controls, "intensity", 0, 3).onChange(function (e) {
+            pointLight.intensity = e;
+        });
+
+        gui.add(controls, "distance", 1, 100).onChange(function (e) {
+            pointLight.distance = e;
+        });
+
+        render();
+
+        function render() {
+
+            stats.update();
+
+            cube.rotation.x += controls.rotationSpeed;
+            cube.rotation.y += controls.rotationSpeed;
+            cube.rotation.z += controls.rotationSpeed;
+
+            step += controls.bounceSpeed;
+            sphere.position.x = 20 + ( 10 * (Math.cos(step)));
+            sphere.position.y = 2 + ( 10 * Math.abs(Math.sin(step)));
+
+            //move the light
+            // move the light simulation
+            if (phase > 2 * Math.PI) {
+                invert = invert * -1;
+                phase -= 2 * Math.PI;
+            } else {
+                phase += controls.rotationSpeed;
+            }
+            sphereLightMesh.position.z = +(7 * (Math.sin(phase)));
+            sphereLightMesh.position.x = +(14 * (Math.cos(phase)));
+            sphereLightMesh.position.y = 5;
+
+            if (invert < 0) {
+                var pivot = 14;
+                sphereLightMesh.position.x = (invert * (sphereLightMesh.position.x - pivot)) + pivot;
+            }
+
+            pointLight.position.copy(sphereLightMesh.position);
+
+            requestAnimationFrame(render);
+
+            renderer.render(scene, camera);
+        }
+
+    }
+
+    function initStats() {
+        var thisstats = new Stats();
+        thisstats.setMode(0);
+        $("#Stats-output").append(thisstats.domElement);
+        return thisstats;
+    }
+</script>
+</body>
+</html>
