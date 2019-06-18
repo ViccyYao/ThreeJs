@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>henmisphere light</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script src="../js/vendor/jquery-3.4.1.min.js"></script>
+    <script src="../js/threejs/three.js"></script>
+    <script src="../js/threejs/stats.js"></script>
+    <script src="../js/threejs/dat.gui.js"></script>
+</head>
+<body>
+<div id="Stats-output" style="position: absolute;top: 0;left: 0;"></div>
+<div id="WebGL-output"></div>
+<script type="text/javascript">
+    var stats, scene, camera, renderer;
+    $(function () {
+        initGis();
+    });
+
+    function initGis() {
+        stats = initStats();
+        scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0xaaaaaa, 0.01, 200);
+
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(new THREE.Color(0xaaaaff, 1.0));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMapEnabled = true;
+
+        //create the ground plane
+        var textureGrass = THREE.ImageUtils.loadTexture("../assets/textures/ground/grasslight-big.jpg");
+        textureGrass.wrapS = THREE.RepeatWrapping;
+        textureGrass.wrapT = THREE.RepeatWrapping;
+        textureGrass.repeat.set(4, 4);
+
+        var plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 200, 20, 20), new THREE.MeshLambertMaterial({map: textureGrass}));
+        plane.receiveShadow = true;
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.set(15, 0, 0);
+        scene.add(plane);
+
+
+        // create a cube
+        var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+        var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff3333});
+        var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.castShadow = true;
+
+        // position the cube
+        cube.position.set(-4, 3, 0);
+
+        // add the cube to the scene
+        scene.add(cube);
+
+        var sphereGeometry = new THREE.SphereGeometry(4, 25, 25);
+        var sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+        var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+        // position the sphere
+        sphere.position.set(10, 5, 10);
+        sphere.castShadow = true;
+
+        // add the sphere to the scene
+        scene.add(sphere);
+
+        camera.position.set(-20, 15, 45);
+        camera.lookAt(new THREE.Vector3(10, 0, 0));
+
+        // add spotlight for a bit of light
+        var spotLight0 = new THREE.SpotLight(0xcccccc);
+        spotLight0.position.set(-40, 60, -10);
+        spotLight0.lookAt(plane);
+        scene.add(spotLight0);
+
+        var target = new THREE.Object3D();
+        target.position = new THREE.Vector3(5, 0, 0);
+
+        var hemiLight = new THREE.HemisphereLight(0x0000ff, 0x00ff00, 0.6);
+        hemiLight.position.set(-100, 100, 100);
+        scene.add(hemiLight);
+
+
+        var pointColor = "#ffffff";
+        var dirLight = new THREE.DirectionalLight(pointColor);
+        dirLight.position.set(30, 10, -50);
+        dirLight.castShadow = true;
+        dirLight.target = plane;
+        dirLight.shadowCameraNear = 0.1;
+        dirLight.shadowCameraFar = 200;
+        dirLight.shadowCameraLeft = -50;
+        dirLight.shadowCameraRight = 50;
+        dirLight.shadowCameraTop = 50;
+        dirLight.shadowCameraBottom = -50;
+        dirLight.shadowMapWidth = 2048;
+        dirLight.shadowMapHeight = 2048;
+        dirLight.shadowCameraVisible=true;
+        scene.add(dirLight);
+
+        // call the render function
+        var step = 0;
+
+        var controls = new function () {
+            this.rotationSpeed = 0.03;
+            this.bouncingSpeed = 0.03;
+
+            this.hemisphere = true;
+            this.groundColor = 0x00ff00;
+            this.skyColor = 0x0000ff;
+            this.intensity = 0.6;
+
+        };
+
+        var gui = new dat.GUI();
+
+        gui.add(controls, 'hemisphere').onChange(function (e) {
+            if (!e) {
+                hemiLight.intensity = 0;
+            } else {
+                hemiLight.intensity = controls.intensity;
+            }
+        });
+        gui.addColor(controls, 'groundColor').onChange(function (e) {
+            hemiLight.groundColor = new THREE.Color(e);
+        });
+        gui.addColor(controls, 'skyColor').onChange(function (e) {
+            hemiLight.color = new THREE.Color(e);
+        });
+        gui.add(controls, 'intensity', 0, 5).onChange(function (e) {
+            hemiLight.intensity = e;
+        });
+
+        $("#WebGL-output").append(renderer.domElement);
+        render();
+
+        function render() {
+            stats.update();
+            // rotate the cube around its axes
+            cube.rotation.x += controls.rotationSpeed;
+            cube.rotation.y += controls.rotationSpeed;
+            cube.rotation.z += controls.rotationSpeed;
+
+            // bounce the sphere up and down
+            step += controls.bouncingSpeed;
+            sphere.position.x = 20 + (10 * (Math.cos(step)));
+            sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
+
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+    }
+
+    function initStats() {
+        var thisStats = new Stats();
+        thisStats.setMode(0);
+        $("#Stats-output").append(thisStats.domElement);
+        return thisStats;
+    }
+</script>
+</body>
+</html>
