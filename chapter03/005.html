@@ -41,6 +41,13 @@
         textureGrass.wrapT = THREE.RepeatWrapping;
         textureGrass.repeat.set(4, 4);
 
+
+        var textureCubeGrass = THREE.ImageUtils.loadTexture("../assets/textures/general/brick-wall.jpg");
+        textureCubeGrass.wrapS = THREE.RepeatWrapping;
+        textureCubeGrass.wrapT = THREE.RepeatWrapping;
+        textureCubeGrass.repeat.set(1, 1);
+
+
         var plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 200, 20, 20), new THREE.MeshLambertMaterial({map: textureGrass}));
         plane.receiveShadow = true;
         plane.rotation.x = -0.5 * Math.PI;
@@ -50,7 +57,8 @@
 
         // create a cube
         var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-        var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff3333});
+        //var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff3333});
+        var cubeMaterial = new THREE.MeshLambertMaterial({map: textureCubeGrass});
         var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
         cube.castShadow = true;
 
@@ -61,7 +69,8 @@
         scene.add(cube);
 
         var sphereGeometry = new THREE.SphereGeometry(4, 25, 25);
-        var sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+        //var sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+        var sphereMaterial = new THREE.MeshLambertMaterial({map: textureGrass});
         var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
         // position the sphere
@@ -101,7 +110,7 @@
         dirLight.shadowCameraBottom = -50;
         dirLight.shadowMapWidth = 2048;
         dirLight.shadowMapHeight = 2048;
-        dirLight.shadowCameraVisible=true;
+        dirLight.shadowCameraVisible = true;
         scene.add(dirLight);
 
         // call the render function

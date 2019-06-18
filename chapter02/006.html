@@ -103,7 +103,12 @@
         }
 
         //绘制一个平面
-        var plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 10, 1, 1), new THREE.MeshLambertMaterial({color: 0xff7777}));
+        var textureCubeGrass = THREE.ImageUtils.loadTexture("../assets/textures/general/brick-wall.jpg");
+        textureCubeGrass.wrapS = THREE.RepeatWrapping;
+        textureCubeGrass.wrapT = THREE.RepeatWrapping;
+        textureCubeGrass.repeat.set(4, 4);
+
+        var plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 10, 1, 1), new THREE.MeshLambertMaterial({map: textureCubeGrass}));
         plane.position.set(500, 0, 0);
         plane.rotation.x = -0.5 * Math.PI;
         scene.add(plane);
