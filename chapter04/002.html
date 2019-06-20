@@ -39,10 +39,15 @@
         camera.position.set(-50, 40, 40);
         camera.lookAt(scene.position);
 
+        //scene.overrideMaterial = new THREE.MeshDepthMaterial();
         var spotLight = new THREE.SpotLight(0xffffff);
         spotLight.intensity = 1;
         spotLight.position.set(-50, 40, 40);
         scene.add(spotLight);
+
+        //scene.overrideMaterial = new THREE.MeshDepthMaterial();
+        var ambientLight = new THREE.AmbientLight(0x1c1c1c);
+        scene.add(ambientLight);
 
         $("#WebGL-output").append(renderer.domElement);
 
