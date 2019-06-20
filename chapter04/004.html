@@ -2,7 +2,7 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>chapter04-01 MeshBasicMaterial</title>
+    <title>chapter0404 mesh normal material</title>
     <style type="text/css">
         body {
             margin: 0;
@@ -36,6 +36,7 @@
 
         var canvasRender = new THREE.CanvasRenderer();
         canvasRender.setSize(window.innerWidth, window.innerHeight);
+
         //renderer set with webGLRenderer
         renderer = webGLRenderer;
 
@@ -51,19 +52,27 @@
         var cubeGeometry = new THREE.BoxGeometry(15, 15, 15);
         var planeGeometry = new THREE.PlaneGeometry(14, 14, 4, 4);
 
-        var material = new THREE.MeshBasicMaterial({color: 0x7777ff});
-        var meshMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+        var material = new THREE.MeshNormalMaterial({color: 0x7777ff});
+
         var sphere = new THREE.Mesh(sphereGeometry, material);
-        sphere.name = "sphere";
         var cube = new THREE.Mesh(cubeGeometry, material);
-        cube.name = "cube";
         var plane = new THREE.Mesh(planeGeometry, material);
-        plane.name = "plane";
         //cube.receiveShadow = true;
 
         sphere.position.set(-10, 3, 2);
         cube.position.copy(sphere.position);
         plane.position = sphere.position;
+
+        for (var i = 0; i < sphere.geometry.faces.length; i++) {
+            var face = sphere.geometry.faces[i];
+            var centroid = new THREE.Vector3(0, 0, 0);
+            centroid.add(sphere.geometry.vertices[face.a]);
+            centroid.add(sphere.geometry.vertices[face.b]);
+            centroid.add(sphere.geometry.vertices[face.c]);
+            centroid.divideScalar(3);
+            var arrow = new THREE.ArrowHelper(face.normal, centroid, 2, 0x3333FF, 0.5, 0.5);
+            sphere.add(arrow);
+        }
 
         scene.add(cube);
 
@@ -88,15 +97,15 @@
             this.bouncingSpeed = 0.03;
             this.opacity = material.opacity;
             this.transparent = material.transparent;
-            this.overdraw = material.overdraw;
             this.visible = material.visible;
             this.selectside = "front";
 
-            this.color = material.color.getStyle();
             this.wireframe = material.wireframe;
             this.wireframeLinewidth = material.wireframeLinewidth;
-            this.wireframeLinejoin = material.wireframeLinejoin;
+
             this.selectMesh = "cube";
+
+            this.shadow = "flat";
 
             this.switchRenderer = function () {
                 if (renderer instanceof THREE.WebGLRenderer) {
@@ -124,6 +133,7 @@
         });
         spguid.add(controls, 'wireframeLinewidth', 0, 20).onChange(function (e) {
             material.wireframeLinewidth = e;
+            material.needsUpdate = true;
         });
 
         spguid.add(controls, 'visible').onChange(function (e) {
@@ -142,12 +152,9 @@
                     material.side = THREE.DoubleSide;
                     break;
             }
-            material.needsUpdate.set(true);
+            material.needsUpdate = true;
         });
 
-        spguid.addColor(controls, 'color').onChange(function (e) {
-            material.color.setStyle(e)
-        });
 
         spguid.add(controls, 'selectMesh', ["cube", "sphere", "plane"]).onChange(function (e) {
             scene.remove(plane);
@@ -167,14 +174,48 @@
             }
         });
 
+
+        spguid.add(controls, 'shadow', ["flat", "smooth"]).onChange(function (e) {
+            switch (e) {
+                case "flat":
+                    // https://github.com/mrdoob/three.js/issues/1929
+                    material.shading = THREE.FlatShading;
+                    break;
+                case "smooth":
+                    material.shading = THREE.SmoothShading;
+                    break;
+            }
+
+            var oldPos = sphere.position.clone();
+            scene.remove(sphere);
+            scene.remove(plane);
+            scene.remove(cube);
+            sphere = new THREE.Mesh(sphere.geometry.clone(), material);
+            cube = new THREE.Mesh(cube.geometry.clone(), material);
+            plane = new THREE.Mesh(plane.geometry.clone(), material);
+
+            sphere.position = oldPos;
+            cube.position = oldPos;
+            plane.position = oldPos;
+
+            switch (controls.selectMesh) {
+                case "cube":
+                    scene.add(cube);
+                    break;
+                case "sphere":
+                    scene.add(sphere);
+                    break;
+                case "plane":
+                    scene.add(plane);
+                    break;
+            }
+
+            material.needsUpdate = true;
+            console.log(material);
+        });
+
+
         gui.add(controls, 'switchRenderer');
-        var cvGui = gui.addFolder("Canvas renderer");
-        cvGui.add(controls, 'overdraw').onChange(function (e) {
-            material.overdraw = e
-        });
-        cvGui.add(controls, 'wireframeLinejoin', ['round', 'bevel', 'miter']).onChange(function (e) {
-            material.wireframeLinejoin = e
-        });
 
         render();
 

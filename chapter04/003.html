@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>chapter0403 combine Material</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script src="../js/vendor/jquery-3.4.1.min.js"></script>
+    <script src="../js/threejs/dat.gui.js"></script>
+    <script src="../js/threejs/three.js"></script>
+    <script src="../js/threejs/stats.js"></script>
+</head>
+<body>
+<div id="Stats-output" style="position: absolute;top: 0;left: 0"></div>
+<div id="WebGL-output"></div>
+<script type="text/javascript">
+    var scene, camera, renderer, stats;
+    $(function () {
+        initGis();
+    });
+
+    function initGis() {
+        stats = initStats();
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x00000, 1.0);
+        renderer.sortObjects = true;
+        renderer.shadowMapEnabled = true;
+
+        camera.position.set(-50, 40, 50);
+        camera.lookAt(scene.position);
+
+        camera.near = 7;
+        camera.far = 139;
+
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.intensity = 1;
+        spotLight.position.set(-50, 40, 50);
+        scene.add(spotLight);
+
+        $("#WebGL-output").append(renderer.domElement);
+
+        var controls = new function () {
+            this.cameraNear = camera.near;
+            this.cameraFar = camera.far;
+            this.rotationSpeed = 0.02;
+            this.numberOfObjects = scene.children.length;
+            this.color = 0x00ff00;
+            this.removeCube = function () {
+                var allChildren = scene.children;
+                var lastObject = allChildren[allChildren.length - 1];
+                if (lastObject instanceof THREE.Mesh) {
+                    scene.remove(lastObject);
+                    this.numberOfObjects = scene.children.length;
+                }
+            };
+            this.addCube = function () {
+                var cubeSize = Math.ceil(3 + (Math.random() * 3));
+                var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+
+                var cubeMaterial = new THREE.MeshDepthMaterial();
+                var colorMaterial = new THREE.MeshLambertMaterial({
+                    color: controls.color,
+                    transparent: true,
+                    blending: THREE.MultiplyBlending
+                });
+
+                var cube = new THREE.SceneUtils.createMultiMaterialObject(cubeGeometry, [colorMaterial, cubeMaterial]);
+
+                cube.children[1].scale.set(0.99, 0.99, 0.99);
+                cube.castShadow = true;
+
+                cube.position.x = -60 + Math.round((Math.random() * 100));
+                cube.position.y = Math.round((Math.random() * 10));
+                cube.position.z = -100 + Math.round((Math.random() * 150));
+
+                // add the cube to the scene
+                scene.add(cube);
+                this.numberOfObjects = scene.children.length;
+            };
+
+            this.outputObjects = function () {
+                console.log(scene.children);
+            }
+        };
+
+        var gui = new dat.GUI();
+        gui.addColor(controls, 'color').onChange(function (color) {
+            scene.traverse(function (e) {
+                if (e instanceof THREE.Mesh) {
+                    e.material.color = new THREE.Color(color);
+                }
+            });
+        });
+        gui.add(controls, 'rotationSpeed', 0, 0.5);
+        gui.add(controls, 'addCube');
+        gui.add(controls, 'removeCube');
+        gui.add(controls, 'cameraNear', 0, 50).onChange(function (e) {
+            camera.near = e;
+        });
+        gui.add(controls, 'cameraFar', 50, 200).onChange(function (e) {
+            camera.far = e;
+        });
+
+        gui.add(controls, 'numberOfObjects').listen();
+
+        var i = 0;
+        while (i < 10) {
+            controls.addCube();
+            i++;
+        }
+
+        render();
+
+        function render() {
+            stats.update();
+            // rotate the cubes around its axes
+            scene.traverse(function (e) {
+                if (e instanceof THREE.Mesh) {
+                    e.rotation.x += controls.rotationSpeed;
+                    e.rotation.y += controls.rotationSpeed;
+                    e.rotation.z += controls.rotationSpeed;
+                }
+            });
+            // render using requestAnimationFrame
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+    }
+
+    function initStats() {
+        var thisStats = new Stats();
+        thisStats.setMode(0);
+        $("#Stats-output").append(thisStats.domElement);
+        return thisStats;
+    }
+</script>
+</body>
+</html>
