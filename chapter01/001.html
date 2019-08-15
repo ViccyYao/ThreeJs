@@ -1,63 +1,62 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
+        "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-  <title>first threejs</title>
-  <script src="../js/threejs/three.js"></script>
-  <script src="../js/vendor/jquery-3.4.1.min.js"></script>
-
+    <title>first threejs</title>
+    <script src="../js/threejs/three.js"></script>
+    <script src="../js/vendor/jquery-3.4.1.min.js"></script>
 </head>
 <body>
 <div id="webGL-output"></div>
 
 <script type="application/javascript">
-  $(function () {
-    intGis();
-  });
+    $(function () {
+        intGis();
+    });
 
-  function intGis() {
-    var scence = new THREE.Scene();
+    function intGis() {
+        var scence = new THREE.Scene();
 
-    var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-    var renderer = new THREE.WebGLRenderer();
-    renderer.setClearColor(new THREE.Color(0XEEEEEE));
-    renderer.setSize(window.innerWidth, window.innerHeight);
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(new THREE.Color(0XEEEEEE));
+        renderer.setSize(window.innerWidth, window.innerHeight);
 
-    var axes = new THREE.AxisHelper(40);
-    scence.add(axes);
+        var axes = new THREE.AxisHelper(40);
+        scence.add(axes);
 
-    var planeGeometry = new THREE.PlaneGeometry(60, 20);
-    var planeMaterial = new THREE.MeshBasicMaterial({color: 0Xcccccc});
-    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.rotation.x = -0.5 * Math.PI;
-    plane.position.set(15, 0, 0);
-    scence.add(plane);
-
-
-    var cube = new THREE.Mesh(new THREE.CubeGeometry(4, 4, 4), new THREE.MeshBasicMaterial({
-      color: 0x7777ff,
-      wireframe: true
-    }));
-    cube.position.set(-4, 4, 4);
-    scence.add(cube);
-
-    var sphere = new THREE.Mesh(new THREE.SphereGeometry(4, 20, 20), new THREE.MeshBasicMaterial({
-      color: 0x777777,
-      wireframe: true
-    }));
-
-    sphere.position.set(20, 4, 2);
-
-    scence.add(sphere);
+        var planeGeometry = new THREE.PlaneGeometry(60, 20);
+        var planeMaterial = new THREE.MeshBasicMaterial({color: 0Xcccccc});
+        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.set(15, 0, 0);
+        scence.add(plane);
 
 
-    camera.position.set(-30, 40, 30);
-    camera.lookAt(scence.position);
+        var cube = new THREE.Mesh(new THREE.CubeGeometry(4, 4, 4), new THREE.MeshBasicMaterial({
+            color: 0x7777ff,
+            wireframe: true
+        }));
+        cube.position.set(-4, 4, 4);
+        scence.add(cube);
 
-    $("#webGL-output").append(renderer.domElement);
-    renderer.render(scence, camera);
-  }
+        var sphere = new THREE.Mesh(new THREE.SphereGeometry(4, 20, 20), new THREE.MeshBasicMaterial({
+            color: 0x777777,
+            wireframe: true
+        }));
+
+        sphere.position.set(20, 4, 2);
+
+        scence.add(sphere);
+
+
+        camera.position.set(-30, 40, 30);
+        camera.lookAt(scence.position);
+
+        $("#webGL-output").append(renderer.domElement);
+        renderer.render(scence, camera);
+    }
 </script>
 </body>
 </html>
