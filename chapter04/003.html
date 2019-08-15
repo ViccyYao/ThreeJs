@@ -13,6 +13,7 @@
     <script src="../js/threejs/dat.gui.js"></script>
     <script src="../js/threejs/three.js"></script>
     <script src="../js/threejs/stats.js"></script>
+    <script src="../js/threejs/OrbitControls.js"></script>
 </head>
 <body>
 <div id="Stats-output" style="position: absolute;top: 0;left: 0"></div>
@@ -115,6 +116,8 @@
             controls.addCube();
             i++;
         }
+
+        var control = new THREE.OrbitControls(camera, renderer.domElement);
 
         render();
 

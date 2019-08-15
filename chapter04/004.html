@@ -15,12 +15,14 @@
     <script src="../js/threejs/stats.js"></script>
     <script src="../js/threejs/CanvasRenderer.js"></script>
     <script src="../js/threejs/Projector.js"></script>
+    <script src="../js/threejs/OrbitControls.js"></script>
+    <script src="../js/threejs/Cloth.js"></script>
 </head>
 <body>
 <div id="Stats-output" style="position: absolute;left: 0;top: 0"></div>
 <div id="WebGL-output"></div>
 <script type="text/javascript">
-    var stats, scene, camera, renderer;
+    var stats, scene, camera, renderer, control;
     $(function () {
         initGis();
     });
@@ -216,6 +218,8 @@
 
 
         gui.add(controls, 'switchRenderer');
+
+        var control = new THREE.OrbitControls(camera, renderer.domElement);
 
         render();
 
