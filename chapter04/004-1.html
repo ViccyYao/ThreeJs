@@ -10,20 +10,21 @@
         }
     </style>
     <script src="../js/vendor/jquery-3.4.1.min.js"></script>
-    <script src="../js/threejs/dat.gui.js"></script>
-    <script src="../js/threejs/three.js"></script>
+    <script src="../demo/dat.gui.min.js"></script>
+    <script src="../demo/three.js"></script>
     <script src="../js/threejs/stats.js"></script>
     <script src="../js/threejs/CanvasRenderer.js"></script>
     <script src="../js/threejs/Projector.js"></script>
-    <script src="../demo/DragControls.js"></script>
     <script src="../js/threejs/OrbitControls.js"></script>
+    <script src="../demo/DragControls.js"></script>
     <script src="../demo/TrackballControls.js"></script>
+    <script src="../demo/TransformControls.js"></script>
 </head>
 <body>
 <div id="Stats-output" style="position: absolute;left: 0;top: 0"></div>
 <div id="WebGL-output"></div>
 <script type="text/javascript">
-    var stats, scene, camera, renderer,control;
+    var stats, scene, camera, renderer, control;
     var objects = [];
     $(function () {
         initGis();
@@ -173,9 +174,7 @@
 
         gui.add(controls, 'switchRenderer');
         var cvGui = gui.addFolder("Canvas renderer");
-        cvGui.add(controls, 'overdraw').onChange(function (e) {
-            material.overdraw = e
-        });
+
         cvGui.add(controls, 'wireframeLinejoin', ['round', 'bevel', 'miter']).onChange(function (e) {
             material.wireframeLinejoin = e
         });
@@ -208,9 +207,13 @@
 
 
     //创建控制器
-    function initControls(){
+    function initControls() {
+        // 添加平移控件
+        var transformControls = new THREE.TransformControls(camera, renderer.domElement);
+        scene.add(transformControls);
+
         //	TrackballControls 轨迹球控件，最常用的控件，可以使用鼠标轻松的移动、平移，缩放场景。
-        control = new THREE.TrackballControls( camera );
+        control = new THREE.TrackballControls(camera);
         control.rotateSpeed = 1.0;// 旋转速度
         control.zoomSpeed = 1.2;// 缩放速度
         control.panSpeed = 0.8;// 平controls
@@ -219,13 +222,18 @@
         control.staticMoving = true;// 静止移动，为 true 则没有惯性
         control.dynamicDampingFactor = 0.3;// 阻尼系数 越小 则滑动越大
         // DragControls 初始化拖拽控件
-        var dragControls = new THREE.DragControls( scene.children, camera, renderer.domElement );
+        var dragControls = new THREE.DragControls(scene.children, camera, renderer.domElement);
+        // 鼠标略过事件
+        dragControls.addEventListener('hoveron', function (event) {
+            // 让变换控件对象和选中的对象绑定
+            transformControls.attach(event.object);
+        });
         // 开始拖拽
-        dragControls.addEventListener( 'dragstart', function () {
+        dragControls.addEventListener('dragstart', function () {
             control.enabled = false;
-        } );
+        });
         // 拖拽结束
-        dragControls.addEventListener( 'dragend', function () {
+        dragControls.addEventListener('dragend', function () {
             control.enabled = true;
         });
     }
