@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>chapter04-01 MeshBasicMaterial</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script src="../js/vendor/jquery-3.4.1.min.js"></script>
+    <script src="../js/threejs/dat.gui.js"></script>
+    <script src="../js/threejs/three.js"></script>
+    <script src="../js/threejs/stats.js"></script>
+    <script src="../js/threejs/CanvasRenderer.js"></script>
+    <script src="../js/threejs/Projector.js"></script>
+    <script src="../demo/DragControls.js"></script>
+    <script src="../js/threejs/OrbitControls.js"></script>
+    <script src="../demo/TrackballControls.js"></script>
+</head>
+<body>
+<div id="Stats-output" style="position: absolute;left: 0;top: 0"></div>
+<div id="WebGL-output"></div>
+<script type="text/javascript">
+    var stats, scene, camera, renderer,control;
+    var objects = [];
+    $(function () {
+        initGis();
+    });
+
+    function initGis() {
+        stats = initStats();
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var webGLRenderer = new THREE.WebGLRenderer();
+        webGLRenderer.setSize(window.innerWidth, window.innerHeight);
+        webGLRenderer.setClearColor(0xEEEEEE, 1.0);
+        webGLRenderer.shadowMapEnabled = true;
+
+        var canvasRender = new THREE.CanvasRenderer();
+        canvasRender.setSize(window.innerWidth, window.innerHeight);
+        //renderer set with webGLRenderer
+        renderer = webGLRenderer;
+
+        var groundGeom = new THREE.PlaneGeometry(100, 100, 4, 4);
+        var groundMaterial = new THREE.MeshBasicMaterial({color: 0x777777});
+        var groundMesh = new THREE.Mesh(groundGeom, groundMaterial);
+        groundMesh.receiveShadow = true;
+        groundMesh.rotation.x = -0.5 * Math.PI;
+        groundMesh.position.y = -20;
+        scene.add(groundMesh);
+
+        var sphereGeometry = new THREE.SphereGeometry(14, 20, 20);
+        var cubeGeometry = new THREE.BoxGeometry(15, 15, 15);
+        var planeGeometry = new THREE.PlaneGeometry(14, 14, 4, 4);
+
+        var material = new THREE.MeshBasicMaterial({color: 0x7777ff});
+        var meshMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+        var sphere = new THREE.Mesh(sphereGeometry, material);
+        sphere.name = "sphere";
+        var cube = new THREE.Mesh(cubeGeometry, material);
+        cube.name = "cube";
+        var plane = new THREE.Mesh(planeGeometry, material);
+        plane.name = "plane";
+        //cube.receiveShadow = true;
+
+        sphere.position.set(-10, 3, 2);
+        cube.position.copy(sphere.position);
+        plane.position = sphere.position;
+
+        scene.add(cube);
+
+        camera.position.set(-50, 50, 40);
+        camera.lookAt(new THREE.Vector3(10, 0, 0));
+
+        var ambiColor = "0x0c0c0c";
+        var ambientLight = new THREE.AmbientLight(ambiColor);
+        scene.add(ambientLight);
+
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(-40, 60, -10);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+
+
+        $("#WebGL-output").append(renderer.domElement);
+
+        var step = 0;
+        var controls = new function () {
+            this.rotationSpeed = 0.02;
+            this.bouncingSpeed = 0.03;
+            this.opacity = material.opacity;
+            this.transparent = material.transparent;
+            this.overdraw = material.overdraw;
+            this.visible = material.visible;
+            this.selectside = "front";
+
+            this.color = material.color.getStyle();
+            this.wireframe = material.wireframe;
+            this.wireframeLinewidth = material.wireframeLinewidth;
+            this.wireframeLinejoin = material.wireframeLinejoin;
+            this.selectMesh = "cube";
+
+            this.switchRenderer = function () {
+                if (renderer instanceof THREE.WebGLRenderer) {
+                    renderer = canvasRender;
+                    $("#WebGL-output").empty();
+                    $("#WebGL-output").append(renderer.domElement);
+                } else {
+                    renderer = webGLRenderer;
+                    $("#WebGL-output").empty();
+                    $("#WebGL-output").append(renderer.domElement);
+                }
+            };
+        };
+
+        var gui = new dat.GUI();
+        var spguid = gui.addFolder("Mesh");
+        spguid.add(controls, 'opacity', 0, 1).onChange(function (e) {
+            material.opacity = e;
+        });
+        spguid.add(controls, 'transparent').onChange(function (e) {
+            material.transparent = e;
+        });
+        spguid.add(controls, 'wireframe').onChange(function (e) {
+            material.wireframe = e;
+        });
+        spguid.add(controls, 'wireframeLinewidth', 0, 20).onChange(function (e) {
+            material.wireframeLinewidth = e;
+        });
+
+        spguid.add(controls, 'visible').onChange(function (e) {
+            material.visible = e;
+        });
+
+        spguid.add(controls, 'selectside', ["front", "back", "double"]).onChange(function (e) {
+            switch (e) {
+                case "front":
+                    material.side = THREE.FrontSide;
+                    break;
+                case "back":
+                    material.side = THREE.BackSide;
+                    break;
+                case "double":
+                    material.side = THREE.DoubleSide;
+                    break;
+            }
+            material.needsUpdate.set(true);
+        });
+
+        spguid.addColor(controls, 'color').onChange(function (e) {
+            material.color.setStyle(e)
+        });
+
+        spguid.add(controls, 'selectMesh', ["cube", "sphere", "plane"]).onChange(function (e) {
+            scene.remove(plane);
+            scene.remove(cube);
+            scene.remove(sphere);
+
+            switch (e) {
+                case "cube":
+                    scene.add(cube);
+                    break;
+                case "sphere":
+                    scene.add(sphere);
+                    break;
+                case "plane":
+                    scene.add(plane);
+                    break;
+            }
+        });
+
+        gui.add(controls, 'switchRenderer');
+        var cvGui = gui.addFolder("Canvas renderer");
+        cvGui.add(controls, 'overdraw').onChange(function (e) {
+            material.overdraw = e
+        });
+        cvGui.add(controls, 'wireframeLinejoin', ['round', 'bevel', 'miter']).onChange(function (e) {
+            material.wireframeLinejoin = e
+        });
+
+        var control = new THREE.OrbitControls(camera, renderer.domElement);
+
+        initControls();
+
+        render();
+
+        function render() {
+            stats.update();
+            cube.rotation.y = step += 0.01;
+            plane.rotation.y = step;
+            sphere.rotation.y = step;
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+
+            // 更新控制器
+            control.update();
+        }
+    }
+
+    function initStats() {
+        var thisStats = new Stats();
+        thisStats.setMode(0);
+        $("#Stats-output").append(thisStats.domElement);
+        return thisStats;
+    }
+
+
+    //创建控制器
+    function initControls(){
+        //	TrackballControls 轨迹球控件，最常用的控件，可以使用鼠标轻松的移动、平移，缩放场景。
+        control = new THREE.TrackballControls( camera );
+        control.rotateSpeed = 1.0;// 旋转速度
+        control.zoomSpeed = 1.2;// 缩放速度
+        control.panSpeed = 0.8;// 平controls
+        control.noZoom = false;
+        control.noPan = false;
+        control.staticMoving = true;// 静止移动，为 true 则没有惯性
+        control.dynamicDampingFactor = 0.3;// 阻尼系数 越小 则滑动越大
+        // DragControls 初始化拖拽控件
+        var dragControls = new THREE.DragControls( scene.children, camera, renderer.domElement );
+        // 开始拖拽
+        dragControls.addEventListener( 'dragstart', function () {
+            control.enabled = false;
+        } );
+        // 拖拽结束
+        dragControls.addEventListener( 'dragend', function () {
+            control.enabled = true;
+        });
+    }
+</script>
+</body>
+</html>
